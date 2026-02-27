@@ -1,3 +1,5 @@
+use crossterm::{cursor, execute};
+
 use crate::matematica::{Vec2, Vec3};
 use std::io::{Result, Stdout, Write};
 
@@ -42,6 +44,7 @@ impl Renderizavel for Vertice {
     }
 }
 
+#[derive(Debug)]
 pub struct Aresta {
     pub de: Vec3<f32>,
     pub ate: Vec3<f32>,
@@ -173,6 +176,8 @@ impl Buffer {
     }
 
     pub fn renderizar(&self, term: &mut Stdout) -> Result<()> {
+        execute!(term, cursor::MoveTo(0, 0))?;
+
         for y in 0..(self.resolucao.y / 2) {
             for x in 0..self.resolucao.x {
                 let (x, y) = (x as isize, y as isize);
@@ -186,7 +191,7 @@ impl Buffer {
                     write!(term, "{cor}{ch}\x1b[0m", cor = Cor::codigo(fg, bg))?;
                 }
             }
-            write!(term, "\n")?;
+            write!(term, "\r\n")?;
         }
 
         Ok(())

@@ -1,24 +1,19 @@
-mod matematica;
-mod renderizacao;
-
-use std::io::stdin;
+mod render;
+mod vetores;
 
 use crossterm::{
-    execute,
+    cursor, execute,
     terminal::{self, disable_raw_mode, enable_raw_mode},
 };
-use matematica::{Vec2, Vec3};
-use renderizacao::{Buffer, Camera, Renderizavel, Vertice};
-
-use crate::renderizacao::Aresta;
+use render::{Aresta, Renderizavel, Vertice, buffer::Buffer, camera::Camera};
+use vetores::{Vec2, Vec3};
 
 fn main() -> std::io::Result<()> {
     let mut term = std::io::stdout();
 
     enable_raw_mode()?;
-    execute!(term, terminal::EnterAlternateScreen)?;
+    execute!(term, terminal::EnterAlternateScreen, cursor::Hide)?;
 
-    let stdin = std::io::stdin();
     let tela = terminal::size()?;
     let res = Vec2::new(tela.0 as usize, tela.1 as usize * 2);
     let cam = Camera::new(Vec3::new(0., 0., 0.), 1.0, res);
@@ -26,7 +21,7 @@ fn main() -> std::io::Result<()> {
 
     let t = vec![
         Vec3::new(-10., 50., 5.),
-        Vec3::new(60., -120., 6.),
+        Vec3::new(60., -120., 100000.),
         Vec3::new(10., 20., 1.1),
         Vec3::new(-10., 50., 5.),
     ];
@@ -51,10 +46,9 @@ fn main() -> std::io::Result<()> {
     let mut a = 1.0_f32;
 
     for _ in 0..100 {
-        buf.limpar();
+        buf.limpar(None);
 
         vert.renderizar(&cam, &mut buf);
-        // ares.renderizar(&cam, &mut buf);
 
         for are in tri.iter() {
             are.renderizar(&cam, &mut buf);
@@ -62,15 +56,14 @@ fn main() -> std::io::Result<()> {
 
         vert.pos.x = a.sin() * 10.0;
         ares.de.y = 4. + a.sin() * 60.;
-        a += 0.5;
+        a += 0.1;
 
         buf.renderizar(&mut term)?;
-        // stdin.read_line(&mut String::new())?;
-        std::thread::sleep(std::time::Duration::from_millis(200));
+        std::thread::sleep(std::time::Duration::from_millis(50));
     }
 
     disable_raw_mode()?;
-    execute!(term, terminal::LeaveAlternateScreen)?;
+    execute!(term, terminal::LeaveAlternateScreen, cursor::Show)?;
 
     Ok(())
 }

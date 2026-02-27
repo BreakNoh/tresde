@@ -19,44 +19,53 @@ fn main() -> std::io::Result<()> {
     let cam = Camera::new(Vec3::new(0., 0., 0.), 1.0, res);
     let mut buf = Buffer::new(res);
 
-    let t = vec![
-        Vec3::new(-10., 50., 5.),
-        Vec3::new(60., -120., 100000.),
-        Vec3::new(10., 20., 1.1),
-        Vec3::new(-10., 50., 5.),
+    let cubo = vec![
+        vec![
+            Vec3::new(40., 40., 5.),
+            Vec3::new(-40., 40., 5.),
+            Vec3::new(-40., 40., 10.),
+            Vec3::new(40., 40., 10.),
+        ],
+        vec![
+            Vec3::new(40., -40., 5.),
+            Vec3::new(-40., -40., 5.),
+            Vec3::new(-40., -40., 10.),
+            Vec3::new(40., -40., 10.),
+        ],
     ];
 
-    let mut tri: Vec<Aresta> = vec![];
-
-    let mut u = t[0];
-
-    for i in 1..=3 {
-        tri.push(Aresta { de: u, ate: t[i] });
-        u = t[i];
-    }
-
-    let mut vert = Vertice {
-        pos: Vec3::new(0., 0., 1.),
-    };
-    let mut ares = Aresta {
-        de: Vec3::new(10., 5., 5.),
-        ate: Vec3::new(-10., -5., 5.),
-    };
-
-    let mut a = 1.0_f32;
+    let mut t = 0.0_f32;
 
     for _ in 0..100 {
         buf.limpar(None);
 
-        vert.renderizar(&cam, &mut buf);
+        t += 0.1;
+        let offset = t.sin() * 10.0;
 
-        for are in tri.iter() {
-            are.renderizar(&cam, &mut buf);
+        for v in 0..4 {
+            for face in cubo.iter() {
+                let (ax, ay, az) = face[v].into();
+                let (bx, by, bz) = face[(v + 1) % 4].into();
+
+                let a = Vec3::new(ax + offset, ay + offset, az + offset);
+                let b = Vec3::new(bx + offset, by + offset, bz + offset);
+
+                let aresta = Aresta { de: a, ate: b };
+
+                aresta.renderizar(&cam, &mut buf);
+            }
+            let (ax, ay, az) = cubo[0][v].into();
+            let (bx, by, bz) = cubo[1][v].into();
+
+            let a = Vec3::new(ax + offset, ay + offset, az + offset);
+            let b = Vec3::new(bx + offset, by + offset, bz + offset);
+            // let a = cubo[0][v];
+            // let b = cubo[1][v];
+
+            let aresta = Aresta { de: a, ate: b };
+
+            aresta.renderizar(&cam, &mut buf);
         }
-
-        vert.pos.x = a.sin() * 10.0;
-        ares.de.y = 4. + a.sin() * 60.;
-        a += 0.1;
 
         buf.renderizar(&mut term)?;
         std::thread::sleep(std::time::Duration::from_millis(50));

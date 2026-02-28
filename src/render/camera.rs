@@ -51,7 +51,9 @@ impl Camera {
 
         Some((Vec2::new(x_proj, y_proj), z_norm))
     }
+}
 
+impl Camera {
     pub fn clipar_linha(&self, p1: Vec3<f32>, p2: Vec3<f32>) -> Option<[Vec3<f32>; 2]> {
         let mut a = p1 - self.pos;
         let mut b = p2 - self.pos;
@@ -90,8 +92,29 @@ impl Camera {
 
         Some([(p1, z1), (p2, z2)])
     }
+}
 
-    pub fn clipar_poligono(&self, vertices: Vec<Vec3<f32>>) -> Vec<Vec3<f32>> {
-        vec![]
+impl Camera {
+    pub fn clipar_poligono(&self, vertices: &[Vec3<f32>]) -> Vec<Vec3<f32>> {
+        let near = self.dist_foco;
+        let entrada = vertices.iter().map(|&v| v - self.pos).collect::<Vec<_>>();
+        let mut saida = Vec::new();
+
+        // Clip contra o plano Near (Z = dist_foco)
+        for i in 0..entrada.len() {
+            let atual = entrada[i];
+            let anterior = entrada[(i + entrada.len() - 1) % entrada.len()];
+
+            if atual.z >= near {
+                if anterior.z < near {
+                    saida.push(interpolar_plano_z(anterior, atual, near));
+                }
+                saida.push(atual);
+            } else if anterior.z >= near {
+                saida.push(interpolar_plano_z(anterior, atual, near));
+            }
+        }
+
+        saida
     }
 }

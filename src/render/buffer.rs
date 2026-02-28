@@ -188,7 +188,7 @@ impl Buffer {
         }
     }
 
-    pub fn desenhar_poligono_2d(&mut self, vertices: &[Vec2<isize>], cor: Color) {
+    pub fn desenhar_poligono(&mut self, vertices: &[Vec2<isize>], cor: Color) {
         if vertices.len() < 3 {
             return;
         }

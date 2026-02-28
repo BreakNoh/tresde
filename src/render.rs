@@ -36,3 +36,40 @@ impl Renderizavel for Aresta {
         };
     }
 }
+
+#[derive(Debug)]
+pub struct Poligono {
+    pub vertices: Vec<Vec3<f32>>,
+}
+
+impl Renderizavel for Poligono {
+    fn renderizar(&self, cam: &Camera, buf: &mut Buffer) {
+        // 1. O clipping é vital para evitar distorções matemáticas
+        let vertices_locais = cam.clipar_poligono(&self.vertices);
+
+        if vertices_locais.len() < 3 {
+            return;
+        }
+
+        // 2. Projetar vértices para o ecrã
+        let mut pontos_2d = Vec::new();
+        // let mut z_acumulado = 0.0;
+
+        for v in &vertices_locais {
+            if let Some((pos, _)) = cam.projetar_local(*v) {
+                pontos_2d.push(pos);
+                // z_acumulado += z;
+            }
+        }
+
+        if pontos_2d.len() < 3 {
+            return;
+        }
+
+        // Z médio para o Z-buffer (simplificação inicial)
+        // let z_final = z_acumulado / pontos_2d.len() as f32;
+
+        // 3. Desenhar no buffer
+        buf.desenhar_poligono(&pontos_2d, Color::Green);
+    }
+}

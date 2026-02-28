@@ -18,8 +18,8 @@ impl Renderizavel for Vertice {
     fn renderizar(&self, cam: &Camera, buf: &mut Buffer) {
         let pos_proj = cam.projetar(self.pos);
 
-        if let Some((pos, z)) = pos_proj {
-            buf.set_pixel(pos, Color::Cyan, z);
+        if let Some((pos, _)) = pos_proj {
+            buf.desenhar_ponto(pos, Color::Cyan);
         }
     }
 }
@@ -31,42 +31,8 @@ pub struct Aresta {
 }
 impl Renderizavel for Aresta {
     fn renderizar(&self, cam: &Camera, buf: &mut Buffer) {
-        let ((a, _az), (b, _bz)) = match cam.projetar_e_clipar_linha(self.de, self.ate) {
-            Some(l) => (l[0], l[1]),
-            None => return,
+        if let Some([(a, _), (b, _)]) = cam.projetar_e_clipar_linha(self.de, self.ate) {
+            buf.desenhar_linha(&vec![a, b], Color::White);
         };
-
-        let mut x0 = a.x;
-        let mut y0 = a.y;
-        let x1 = b.x;
-        let y1 = b.y;
-
-        let dx = (x1 - x0).abs();
-        let dy = -(y1 - y0).abs();
-
-        let sx = if x0 < x1 { 1 } else { -1 };
-        let sy = if y0 < y1 { 1 } else { -1 };
-
-        let mut err = dx + dy;
-
-        loop {
-            buf.set_pixel(Vec2::new(x0, y0), Color::White, 0.5);
-
-            if x0 == x1 && y0 == y1 {
-                break;
-            }
-
-            let e2 = 2 * err;
-
-            if e2 >= dy {
-                err += dy;
-                x0 += sx;
-            }
-
-            if e2 <= dx {
-                err += dx;
-                y0 += sy;
-            }
-        }
     }
 }

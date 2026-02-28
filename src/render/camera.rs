@@ -65,38 +65,14 @@ impl Camera {
 
         if a.z < near {
             a = interpolar_plano_z(a, b, near);
-            // let t = (near - a.z) / (b.z - a.z);
-            // a = Vec3 {
-            //     x: a.x + t * (b.x - a.x),
-            //     y: a.y + t * (b.y - a.y),
-            //     z: near,
-            // };
         } else if b.z < near {
             b = interpolar_plano_z(b, a, near);
-            // let t = (near - a.z) / (b.z - a.z);
-            // b = Vec3 {
-            //     x: a.x + t * (b.x - a.x),
-            //     y: a.y + t * (b.y - a.y),
-            //     z: near,
-            // };
         }
 
         if a.z > far {
             a = interpolar_plano_z(a, b, far);
-            // let t = (far - a.z) / (b.z - a.z);
-            // a = Vec3 {
-            //     x: a.x + t * (b.x - a.x),
-            //     y: a.y + t * (b.y - a.y),
-            //     z: far,
-            // };
         } else if b.z > far {
             b = interpolar_plano_z(b, a, far);
-            // let t = (far - a.z) / (b.z - a.z);
-            // b = Vec3 {
-            //     x: a.x + t * (b.x - a.x),
-            //     y: a.y + t * (b.y - a.y),
-            //     z: far,
-            // };
         }
 
         Some([a, b])

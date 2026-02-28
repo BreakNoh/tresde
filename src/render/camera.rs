@@ -1,5 +1,14 @@
 use crate::vetores::*;
 
+fn interpolar_plano_z(a: Vec3<f32>, b: Vec3<f32>, z_plano: f32) -> Vec3<f32> {
+    let t = (z_plano - a.z) / (b.z - a.z);
+    Vec3 {
+        x: a.x + t * (b.x - a.x),
+        y: a.y + t * (b.y - a.y),
+        z: z_plano,
+    }
+}
+
 pub struct Camera {
     pos: Vec3<f32>,
     dist_foco: f32,
@@ -55,35 +64,39 @@ impl Camera {
         }
 
         if a.z < near {
-            let t = (near - a.z) / (b.z - a.z);
-            a = Vec3 {
-                x: a.x + t * (b.x - a.x),
-                y: a.y + t * (b.y - a.y),
-                z: near,
-            };
+            a = interpolar_plano_z(a, b, near);
+            // let t = (near - a.z) / (b.z - a.z);
+            // a = Vec3 {
+            //     x: a.x + t * (b.x - a.x),
+            //     y: a.y + t * (b.y - a.y),
+            //     z: near,
+            // };
         } else if b.z < near {
-            let t = (near - a.z) / (b.z - a.z);
-            b = Vec3 {
-                x: a.x + t * (b.x - a.x),
-                y: a.y + t * (b.y - a.y),
-                z: near,
-            };
+            b = interpolar_plano_z(b, a, near);
+            // let t = (near - a.z) / (b.z - a.z);
+            // b = Vec3 {
+            //     x: a.x + t * (b.x - a.x),
+            //     y: a.y + t * (b.y - a.y),
+            //     z: near,
+            // };
         }
 
         if a.z > far {
-            let t = (far - a.z) / (b.z - a.z);
-            a = Vec3 {
-                x: a.x + t * (b.x - a.x),
-                y: a.y + t * (b.y - a.y),
-                z: far,
-            };
+            a = interpolar_plano_z(a, b, far);
+            // let t = (far - a.z) / (b.z - a.z);
+            // a = Vec3 {
+            //     x: a.x + t * (b.x - a.x),
+            //     y: a.y + t * (b.y - a.y),
+            //     z: far,
+            // };
         } else if b.z > far {
-            let t = (far - a.z) / (b.z - a.z);
-            b = Vec3 {
-                x: a.x + t * (b.x - a.x),
-                y: a.y + t * (b.y - a.y),
-                z: far,
-            };
+            b = interpolar_plano_z(b, a, far);
+            // let t = (far - a.z) / (b.z - a.z);
+            // b = Vec3 {
+            //     x: a.x + t * (b.x - a.x),
+            //     y: a.y + t * (b.y - a.y),
+            //     z: far,
+            // };
         }
 
         Some([a, b])
@@ -100,5 +113,9 @@ impl Camera {
         let (p2, z2) = self.projetar_local(cb)?;
 
         Some([(p1, z1), (p2, z2)])
+    }
+
+    pub fn clipar_poligono(&self, vertices: Vec<Vec3<f32>>) -> Vec<Vec3<f32>> {
+        vec![]
     }
 }
